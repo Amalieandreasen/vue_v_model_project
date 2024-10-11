@@ -25,35 +25,35 @@
   <!-- 8: When the user has entered a username and an email (he has submitted the form), alert the user something like this: https://mmd.ucn.dk/lecturer/mfw/assets/img/vue-binding-example1.png also add the user to the users array in reactive data -->
 
   <h1 class="main-title">A great webshop</h1>
-
   <div class="newsletter center">
     <p>Sign up for our newsletter here!</p>
-    <form>
+    <form @submit.prevent="signupNewsletter">
       <div>
         <label for="username">Username:</label>
-        <input type="text" id="username" name="username" placeholder="Username:" required />
+        <input v-model="newsletterUser.username" type="text" id="username" name="username" placeholder="Username:" required />
       </div>
       <div>
         <label for="email">email:</label>
-        <input type="email" id="email" name="email" placeholder="Email:" required />
+        <input v-model="newsletterUser.email" type="email" id="email" name="email" placeholder="Email:" required />
       </div>
       <button>Sign Up</button>
     </form>
   </div>
   <div class="product-wrapper center">
-    <div class="card">
+    <div v-for="product in products" :key="product.id" class="card">
+      <span v-if ="product.category == 'electronics'" class="rotate">On Sale</span>
       <div class="product">
         <div class="product-image">
-          <img src="https://raw.githubusercontent.com/mahaUser2/productsDummyJson/main/81fPKd-2AYL._AC_SL1500_.jpg" alt="Some bag" />
+          <img :src="product.image" :alt="product.title" />
         </div>
         <div class="product-info">
           <header>
-            <h3>Taske</h3>
-            <p class="price">2000000kr</p>
-            <p class="category">Taske</p>
+            <h3 :class="{featured : product.category == 'electronics'}">{{product.title}}</h3>
+            <p class="price"> $ {{product.price.toFixed(2)}}</p>
+            <p class="category">{{ product.category }}</p>
           </header>
-          <p class="description">Her er en taske</p>
-          <p class="stock">In stock: 300</p>
+          <p class="description">{{product.description}}</p>
+          <p class="stock" :class="{red: product.rating.count< 100, green: product.rating.count >= 100}">In stock: {{ product.rating.count }}</p>
         </div>
       </div>
     </div>
@@ -61,7 +61,39 @@
 </template>
 
 <script setup>
+import {ref} from "vue";
+
 // State
+const products = ref(null)
+const newsletterUser = ref({
+  username: null,
+  email: null
+})
+const registredUsers = ref([])
+
+//hent data 
+fetch("https://mahauser2.github.io/productsDummyJson/products.json ")
+.then(res => res.json())
+.then(data => products.value = data)
+.catch(err => console.log("her er en fejl", err))
+
+//functions
+function signupNewsletter(){
+  //Alert til brugeren
+  alert("Tillykke med det - kære "+newsletterUser.value.username+" og "+newsletterUser.value.email+"")
+
+  //tilføje til state registredUsers
+  registredUsers.value.push(newsletterUser.value)
+
+  //reset newsletter user
+  newsletterUser.value = {
+    username: null,
+    email: null
+  }
+
+  //log registredUsers
+  console.log(registredUsers.value)
+}
 </script>
 
 <style scoped>
